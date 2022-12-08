@@ -5,6 +5,7 @@ var index = 4;
 var characters = input[..4];
 Output(index, characters, input);
 
+// part 2
 index = 14;
 characters = input[..14];
 Output(index, characters, input);
