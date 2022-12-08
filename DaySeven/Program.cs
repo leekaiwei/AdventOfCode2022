@@ -3,9 +3,12 @@ const string listDirectory = "ls";
 const string rootDirectory = "/";
 
 var lines = await File.ReadAllLinesAsync("H:\\Repositories\\AdventOfCode2022\\DaySeven\\input.txt");
+
+// part 1
 var currentDirectory = string.Empty;
 var directorySizes = new Dictionary<string, int>();
-var totalDirectorySize = 0;
+var totalDirectorySizeUnderTenThousand = 0;
+var totalSize = 0;
 
 foreach (var line in lines)
 {
@@ -27,11 +30,26 @@ foreach (var directorySize in directorySizes)
 {
     if (directorySize.Value <= 100000)
     {
-        totalDirectorySize += directorySize.Value;
+        totalDirectorySizeUnderTenThousand += directorySize.Value;
     }
 }
 
-Console.WriteLine(totalDirectorySize);
+Console.WriteLine(totalDirectorySizeUnderTenThousand);
+
+// part 2
+var maximumDiskSpace = 70000000;
+var requiredDiskSpace = 30000000;
+var smallestDirectory = maximumDiskSpace;
+foreach (var directorySize in directorySizes)
+{
+    var remainingSpace = maximumDiskSpace - totalSize + directorySize.Value;
+    if (remainingSpace >= requiredDiskSpace && directorySize.Value < smallestDirectory)
+    {
+        smallestDirectory = directorySize.Value;
+    }
+}
+
+Console.WriteLine(smallestDirectory);
 
 void Command(string input)
 {
@@ -87,4 +105,6 @@ void ProcessDirectorySize(int directorySize)
             directorySizes[directory] = size;
         }
     }
+
+    totalSize += directorySize;
 }
