@@ -1,5 +1,6 @@
 ﻿var lines = await File.ReadAllLinesAsync("H:\\Repositories\\AdventOfCode2022\\DayFour\\input.txt");
 
+// part 1
 var numberOfPairs = 0;
 foreach (var line in lines)
 {
