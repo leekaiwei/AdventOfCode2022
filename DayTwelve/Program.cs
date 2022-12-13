@@ -101,8 +101,8 @@ for (var y = 0; y < lines.Length; y++)
 var shortestPath = int.MaxValue;
 
 // part 1
-//shortestPath = Execute(graph, start);
-//Console.WriteLine(shortestPath);
+shortestPath = Execute(graph, start);
+Console.WriteLine(shortestPath);
 
 // part 2
 shortestPath = int.MaxValue;
