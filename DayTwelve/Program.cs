@@ -1,10 +1,11 @@
 ﻿var lines = await File.ReadAllLinesAsync("H:\\Repositories\\AdventOfCode2022\\DayTwelve\\input.txt");
 var height = lines.Length;
 var length = lines[0].Length;
+
 var matrix = new int[lines[0].Length, lines.Length];
 var start = (0, 0);
 var end = (0, 0);
-
+var starts = new List<(int, int)>();
 for (var y = 0; y < lines.Length; y++)
 {
     var line = lines[y];
@@ -24,6 +25,11 @@ for (var y = 0; y < lines.Length; y++)
         }
         else
         {
+            if (character == 'a')
+            {
+                starts.Add((x, y));
+            }
+
             currentNodeHeight = character;
         }
 
@@ -92,35 +98,59 @@ for (var y = 0; y < lines.Length; y++)
     }
 }
 
-var firstNode = graph.Single(n => n.X == start.Item1 && n.Y == start.Item2);
-var queue = new Queue<Node>();
-queue.Enqueue(firstNode);
+var shortestPath = int.MaxValue;
 
-var paths = new Dictionary<Node, List<Node>>();
-var visitedNodes = new Dictionary<Node, int>() { { firstNode, 0 } };
-while (queue.Any())
+// part 1
+//shortestPath = Execute(graph, start);
+//Console.WriteLine(shortestPath);
+
+// part 2
+shortestPath = int.MaxValue;
+foreach (var s in starts)
 {
-    var node = queue.Dequeue();
-    var nodeData = visitedNodes.First(n => n.Key.X == node.X && n.Key.Y == node.Y);
-    foreach (var neighbourNode in node.Neighbours)
+    var path = Execute(graph, s);
+    if (path < shortestPath)
     {
-        var isNodeVisited = visitedNodes.Any(n => n.Key.X == neighbourNode.X && n.Key.Y == neighbourNode.Y);
-        var actualNeighbourNode = graph.Single(n => n.X == neighbourNode.X && n.Y == neighbourNode.Y);
-        if (!isNodeVisited)
-        {
-            queue.Enqueue(actualNeighbourNode);
-            visitedNodes.Add(neighbourNode, nodeData.Value + 1);
-
-            if (neighbourNode.X == end.Item1 && neighbourNode.Y == end.Item2)
-            {
-                break;
-            }
-        }
+        shortestPath = path;
     }
 }
 
-var destinationNode = visitedNodes.Single(n => n.Key.X == end.Item1 && n.Key.Y == end.Item2);
-Console.WriteLine(destinationNode.Value);
+Console.WriteLine(shortestPath);
+
+int Execute(List<Node> graph, (int, int) start)
+{
+    Console.WriteLine($"{start.Item1}, {start.Item2}");
+    var firstNode = graph.Single(n => n.X == start.Item1 && n.Y == start.Item2);
+    var queue = new Queue<Node>();
+    queue.Enqueue(firstNode);
+
+    var paths = new Dictionary<Node, List<Node>>();
+    var visitedNodes = new Dictionary<Node, int>() { { firstNode, 0 } };
+    while (queue.Any())
+    {
+        var node = queue.Dequeue();
+        var nodeData = visitedNodes.First(n => n.Key.X == node.X && n.Key.Y == node.Y);
+        foreach (var neighbourNode in node.Neighbours)
+        {
+            var isNodeVisited = visitedNodes.Any(n => n.Key.X == neighbourNode.X && n.Key.Y == neighbourNode.Y);
+            var actualNeighbourNode = graph.Single(n => n.X == neighbourNode.X && n.Y == neighbourNode.Y);
+            if (!isNodeVisited)
+            {
+                queue.Enqueue(actualNeighbourNode);
+                visitedNodes.Add(neighbourNode, nodeData.Value + 1);
+
+                if (neighbourNode.X == end.Item1 && neighbourNode.Y == end.Item2)
+                {
+                    break;
+                }
+            }
+        }
+    }
+
+    var destinationNode = visitedNodes.SingleOrDefault(n => n.Key.X == end.Item1 && n.Key.Y == end.Item2);
+
+    return destinationNode.Key == null ? int.MaxValue : destinationNode.Value;
+}
 
 static bool TryGetNeighbourNode(int currentNodeHeight, int x, int y, int[,] matrix, out Node node)
 {
