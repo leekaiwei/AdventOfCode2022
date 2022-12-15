@@ -1,4 +1,6 @@
-﻿var lines = await File.ReadAllLinesAsync("H:\\Repositories\\AdventOfCode2022\\DayFifteen\\input.txt");
+﻿using System.Diagnostics.CodeAnalysis;
+
+var lines = await File.ReadAllLinesAsync("H:\\Repositories\\AdventOfCode2022\\DayFifteen\\input.txt");
 var data = new Dictionary<int, Dictionary<int, Item?>>();
 var sensorsToBeacons = new List<((int, int), (int, int), int)>();
 
@@ -61,53 +63,149 @@ foreach (var line in lines)
     sensorsToBeacons.Add(((sensorX, sensorY), (beaconX, beaconY), delta));
 }
 
-var tasks = new List<Task>();
+//PartOne(data, sensorsToBeacons, minimumX, maximumX);
 
-const int y = 2000000;
-var filledY = new HashSet<int>();
-var index = 1;
-foreach (var combinations in sensorsToBeacons)
+PartTwo(data, sensorsToBeacons);
+
+void PartOne(Dictionary<int, Dictionary<int, Item?>> data, List<((int, int), (int, int), int)> sensorsToBeacons, int minimumX, int maximumX)
 {
-    var sensorX = combinations.Item1.Item1;
-    var sensorY = combinations.Item1.Item2;
-    var beaconX = combinations.Item2.Item1;
-    var beaconY = combinations.Item2.Item2;
-    var sensorMaxRange = combinations.Item3;
-
-    for (var x = minimumX; x <= maximumX; x++)
+    const int y = 10;
+    var filledY = new HashSet<int>();
+    var index = 1;
+    foreach (var combinations in sensorsToBeacons)
     {
-        //if (x % 1000000 == 0)
-        //{
-        //    Console.WriteLine($"{index}: {x} || {minimumX} - {maximumX}");
-        //}
+        var sensorX = combinations.Item1.Item1;
+        var sensorY = combinations.Item1.Item2;
+        var beaconX = combinations.Item2.Item1;
+        var beaconY = combinations.Item2.Item2;
+        var sensorMaxRange = combinations.Item3;
 
-        var xDelta = x - sensorX;
-        var yDelta = y - sensorY;
-        var delta = Math.Abs(xDelta) + Math.Abs(yDelta);
-
-        var pointTaken = false;
-        if (data.TryGetValue(x, out var xData))
+        for (var x = minimumX; x <= maximumX; x++)
         {
-            if (xData.ContainsKey(y))
+            //if (x % 1000000 == 0)
+            //{
+            //    Console.WriteLine($"{index}: {x} || {minimumX} - {maximumX}");
+            //}
+
+            var xDelta = x - sensorX;
+            var yDelta = y - sensorY;
+            var delta = Math.Abs(xDelta) + Math.Abs(yDelta);
+
+            var pointTaken = false;
+            if (data.TryGetValue(x, out var xData))
             {
-                pointTaken = true;
+                if (xData.ContainsKey(y))
+                {
+                    pointTaken = true;
+                }
+            }
+
+            if (delta <= sensorMaxRange && !pointTaken)
+            {
+                filledY.Add(x);
             }
         }
 
-        if (delta <= sensorMaxRange && !pointTaken)
-        {
-            filledY.Add(x);
-        }
+        Console.WriteLine(index);
+        index++;
     }
 
-    Console.WriteLine(index);
-    index++;
+    Console.WriteLine(filledY.Count);
+    //Print(data, minimumX, minimumY, maximumX, maximumY);
 }
 
-await Task.WhenAll(tasks);
+void PartTwo(Dictionary<int, Dictionary<int, Item?>> data, List<((int, int), (int, int), int)> sensorsToBeacons)
+{
+    const int max = 20;
+    var index = 1;
+    //var emptyPoints = new char[max + 1, max + 1];
+    //for (var x = 0; x <= max; x++)
+    //{
+    //    for (var y = 0; y <= max; y++)
+    //    {
+    //        emptyPoints[x, y] = 'X';
+    //    }
+    //}
 
-Console.WriteLine(filledY.Count);
-//Print(data, minimumX, minimumY, maximumX, maximumY);
+    var result = new HashSet<(int, int)>();
+    var confirmed = new HashSet<(int, int)>(new Comparer());
+    
+    foreach (var combinations in sensorsToBeacons)
+    {
+        var sensorX = combinations.Item1.Item1;
+        var sensorY = combinations.Item1.Item2;
+        var beaconX = combinations.Item2.Item1;
+        var beaconY = combinations.Item2.Item2;
+        var sensorMaxRange = combinations.Item3;
+
+        var hashSet = new HashSet<(int, int)>(new Comparer());
+        var subList = new HashSet<(int, int)>(new Comparer());
+        var y = 0;
+        while (y <= max)
+        {
+            var xList = new HashSet<int>();
+            var x = 0;
+            while (x <= max)
+            {
+                Console.WriteLine(x);
+                //if (x % 1000000 == 0)
+                //{
+                //    Console.WriteLine($"{index}: {x} || {minimumX} - {maximumX}");
+                //}
+            
+                var xDelta = x - sensorX;
+                var yDelta = y - sensorY;
+                var delta = Math.Abs(xDelta) + Math.Abs(yDelta);
+
+                var pointTaken = false;
+                if (data.TryGetValue(x, out var xData))
+                {
+                    if (xData.ContainsKey(y))
+                    {
+                        pointTaken = true;
+                    }
+                }
+
+                if (delta > sensorMaxRange && !pointTaken && !confirmed.Contains((x, y)))
+                {
+                    result.Add((x, y));
+                    //x++;
+                }
+                else
+                {
+                    result.Remove((x, y));
+                    confirmed.Add((x, y));
+
+                    //var skip = (delta - y) * 2;
+                    //var amountMinus = sensorY - y;
+                    //var a = delta - amountMinus;
+                    //var skipFrom = sensorX - a;
+
+                    //x = skipFrom + skip;
+                }
+                x++;
+            }
+
+            y++;
+        }
+
+        Console.WriteLine(index);
+        index++;
+    }
+
+    //for (var i = 0; i < max + 1; i++)
+    //{
+    //    for (var j = 0; j < max + 1; j++)
+    //    {
+    //        Console.Write(emptyPoints[i, j]);
+    //    }
+
+    //    Console.WriteLine();
+    //}
+    var final = result.Single();
+    Console.WriteLine((final.Item1 * 40000000) + final.Item2);
+    //Print(data, minimumX, minimumY, maximumX, maximumY);
+}
 
 static void Print(Dictionary<int, Dictionary<int, Item?>> grid, int fromX, int fromY, int toX, int toY)
 {
@@ -157,4 +255,18 @@ enum Item
     NoBeacon,
     Sensor,
     Beacon
+}
+
+class Comparer : IEqualityComparer<(int, int)>
+{
+    public bool Equals((int, int) x, (int, int) y)
+    {
+        return x.Item1 == y.Item1 && x.Item2 == y.Item2;
+    }
+
+    public int GetHashCode([DisallowNull] (int, int) obj)
+    {
+        var tmp = (obj.Item2 + ((obj.Item1 + 1) / 2));
+        return obj.Item1 + (tmp * tmp);
+    }
 }
